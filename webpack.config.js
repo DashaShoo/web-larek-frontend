@@ -23,6 +23,7 @@ const config = {
   devServer: {
     open: true,
     host: "localhost",
+    port: 8081,
     watchFiles: ["src/pages/*.html"],
     hot: true
   },
