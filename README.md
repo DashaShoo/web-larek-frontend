@@ -50,9 +50,13 @@ yarn build
 
 ## Структура классов и интерфейсов:
 - IPage: Контейнер для всей страницы, объединяющий список товаров и корзину.
+
 counter: number — счётчик товаров на странице.
+
 cart: ICart — корзина с товарами.
+
 products: IProductList — список товаров.
+
 ```
 export interface IPage {
 	counter: number;
@@ -63,11 +67,17 @@ export interface IPage {
 
 - IProduct: Интерфейс описания товара с полями (id, название, описание, цена, категория, изображение).
 id: string — уникальный идентификатор товара.
+
 title: string — название товара.
+
 description: string — описание товара.
+
 category: string — категория товара.
+
 price: number — цена товара.
+
 image: string — ссылка на изображение товара.
+
 ```
 export interface IProduct {
 	id: string;
@@ -80,8 +90,11 @@ export interface IProduct {
 ```
 
 - IProductList: Отвечает за управление списком товаров, позволяет обновлять каталог.
+
 items: IProduct[] — массив товаров.
+
 setProductList(products: IProduct[]): void — метод обновления списка товаров.
+
 ```
 export interface IProductList {
 	items: IProduct[];
@@ -90,12 +103,19 @@ export interface IProductList {
 ```
 
 - ICart: Управляет корзиной, добавлением/удалением товаров, подсчётом итоговой суммы.
+
 products: Map<string, IProduct> — коллекция товаров в корзине.
+
 total: number — итоговая сумма заказа.
+
 addProduct(product: IProduct): void — добавляет товар в корзину.
+
 removeProduct(product: IProduct): void — удаляет товар из корзины.
+
 getProducts(): IProduct[] — возвращает список товаров в корзине.
+
 clearCart(): void — очищает корзину.
+
 ```
 export interface ICart {
 	products: Map<string, IProduct>;
@@ -108,13 +128,21 @@ export interface ICart {
 ```
 
 - IOrder: Хранит данные о заказе, включая способ оплаты, адрес и список товаров.
+
 payment: string — способ оплаты.
+
 email: string — email покупателя.
+
 phone: string — телефон покупателя.
+
 address: string — адрес доставки.
+
 total: number — итоговая сумма заказа.
+
 items: string[] — список идентификаторов товаров в заказе.
+
 generateOrderFromCart(cart: ICart): string — создаёт заказ на основе корзины.
+
 ```
 export interface IOrder {
 	payment: string;
@@ -128,8 +156,11 @@ export interface IOrder {
 ```
 
 - IOrderResult: Отвечает за результат заказа, включая уникальный идентификатор.
+
 id: string — уникальный идентификатор заказа.
+
 total: number — итоговая сумма заказа.
+
 ```
 export interface IOrderResult {
 	id: string;
@@ -138,8 +169,11 @@ export interface IOrderResult {
 ```
 
 - IApi: Реализует работу с сервером (загрузка товаров, отправка заказа).
+
 getProductList(): Promise<IProductList> — загружает список товаров.
+
 getProduct(id: string): Promise<IProduct> — загружает товар по идентификатору.
+
 postOrder(order: IOrder): Promise<IOrderResult> — отправляет заказ на сервер.
 ```
 export interface IApi {
