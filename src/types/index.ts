@@ -26,6 +26,10 @@ export interface ICart {
     getProducts(): IProduct[];
     clearCart(): void;
 }
+export interface IBasketView {
+	products: HTMLElement[];
+	total: number;
+}
 
 
 export interface IOrder {
@@ -35,7 +39,7 @@ export interface IOrder {
 	address: string;
 	total: number;
 	items: string[];
-	generateOrderFromCart(cart: ICart): string;
+	
 }
 
 export interface IOrderResult {
@@ -43,8 +47,31 @@ export interface IOrderResult {
     total: number;
 }
 
+export type Payment = 'online' | 'offline';
+
+export interface IOrderForm {
+	payment: Payment;
+	address: string;
+}
+
+export interface IContacts {
+	phone: string;
+	email: string;
+}
+
+
 export interface IApi {
 	getProductList(): Promise<IProductList>;
 	getProduct(id: string): Promise<IProduct>;
 	postOrder(order: IOrder): Promise<IOrderResult>;
 }
+
+export interface IAppState {
+	basket: IBasketView[];
+	gallery: IProduct[];
+	order: IOrder | null;
+	loading: boolean;
+}
+
+export type formOrderErrors = Partial<Record<keyof IOrderForm, string>>;
+export type formContactsErrors = Partial<Record<keyof IContacts, string>>;

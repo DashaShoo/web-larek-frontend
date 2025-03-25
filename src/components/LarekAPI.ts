@@ -2,8 +2,10 @@ import {IApi, IOrder, IProductList, IProduct, IOrderResult} from "../types/index
 import { Api } from './base/api';
 
 export class LarekAPI extends Api implements IApi {
+    readonly cdn: string;
     constructor(cdn: string, baseUrl: string, options?: RequestInit) {
         super(baseUrl, options);
+        this.cdn=cdn;
     }
 
     getProductList(): Promise<IProductList> {
