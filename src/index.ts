@@ -4,11 +4,12 @@ import { LarekAPI } from './components/LarekAPI';
 import {IApi, IOrder, IProductList, IProduct, IOrderResult} from "./types/index";
 import { EventEmitter } from './components/base/events';
 import { AppState, ProductItem } from './components/AppData';
-import { Card } from './components/Card';
+import { Card , IBasketElement, BasketElement} from './components/Card';
 import { Page } from './components/Page';
 import { cloneTemplate, createElement, ensureElement } from './utils/utils';
 import {Modal} from "./components/common/Modal";
 import {Form} from "./components/common/Form";
+import {Basket} from "./components/Basket"
 
 
 const api = new LarekAPI(CDN_URL, API_URL);
@@ -33,7 +34,7 @@ events.onAll(({ eventName, data }) => {
 
 const page = new Page(document.body, events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
-
+const basket = new Basket(cloneTemplate(basketTemplate), events);
 
 
 events.on('items:changed', () => {
@@ -110,6 +111,35 @@ events.on('basket:push', (item: ProductItem) => {
 	modal.close();
 	
 });
+
+
+
+events.on('basket:open', () => {
+	modal.render({
+		content: createElement<HTMLElement>('div', {}, [
+			basket.render({
+				products: appData.basket.reduce((array, item: IBasketElement, i) => {
+					const cardBasket = new BasketElement(cloneTemplate(cardBasketTemplate), events);
+					return [
+						...array,
+						cardBasket.render({
+							index: i + 1,
+							title: item.title,
+							price: item.price,
+						}),
+					];
+				}, []),
+				total: appData.basket.reduce((total, item) => total + item.price, 0),
+			}),
+		]),
+	});
+});
+
+events.on('basket:delete', (item: IBasketElement) => {
+	appData.deleteProduct(item.index);
+	page.counter = appData.basket.length;
+});
+
 
 
 api.getProductList()
