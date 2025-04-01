@@ -75,3 +75,8 @@ export interface IAppState {
 
 export type formOrderErrors = Partial<Record<keyof IOrderForm, string>>;
 export type formContactsErrors = Partial<Record<keyof IContacts, string>>;
+
+export interface IContacts {
+	phone: string;
+	email: string;
+}

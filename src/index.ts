@@ -1,7 +1,7 @@
 import './scss/styles.scss';
 import { API_URL, CDN_URL } from './utils/constants';
 import { LarekAPI } from './components/LarekAPI';
-import {IApi, IOrder, IProductList, IProduct, IOrderResult} from "./types/index";
+import {IApi, IOrder, IProductList, IProduct, IOrderResult, Payment, IOrderForm, IContacts} from "./types/index";
 import { EventEmitter } from './components/base/events';
 import { AppState, ProductItem } from './components/AppData';
 import { Card , IBasketElement, BasketElement} from './components/Card';
@@ -9,7 +9,10 @@ import { Page } from './components/Page';
 import { cloneTemplate, createElement, ensureElement } from './utils/utils';
 import {Modal} from "./components/common/Modal";
 import {Form} from "./components/common/Form";
-import {Basket} from "./components/Basket"
+import {Basket} from "./components/Basket";
+import {Order} from "./components/Order";
+import { Contacts } from './components/Contacts';
+import { Success } from './components/Success';
 
 
 const api = new LarekAPI(CDN_URL, API_URL);
@@ -35,6 +38,8 @@ events.onAll(({ eventName, data }) => {
 const page = new Page(document.body, events);
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 const basket = new Basket(cloneTemplate(basketTemplate), events);
+const order = new Order(cloneTemplate(orderTemplate), events);
+const contacts = new Contacts(cloneTemplate(contactsTemplate), events);
 
 
 events.on('items:changed', () => {
@@ -138,6 +143,84 @@ events.on('basket:open', () => {
 events.on('basket:delete', (item: IBasketElement) => {
 	appData.deleteProduct(item.index);
 	page.counter = appData.basket.length;
+});
+
+
+events.on('order:open', () => {
+	appData.order.items = appData.basket.map((item) => item.id);
+	appData.order.total = appData.basket.reduce((sum, item) => item.price + sum, 0);
+
+	console.log(appData.order);
+
+	modal.render({
+		content: order.render({
+			payment: 'online',
+			address: '',
+			valid: false,
+			errors: []
+		}),
+	});
+});
+
+events.on(/^order\..*:change/, (data: { field: keyof IOrderForm; value: string & Payment }) => {
+	appData.setOrderField(data.field, data.value);
+});
+
+
+events.on('formOrderErrors:change', (errors: Partial<IOrderForm>) => {
+	const { address } = errors;
+	order.valid = !address;
+	order.errors = Object.values({ address })
+		.filter((i) => !!i)
+		.join('; ');
+});
+
+
+events.on('order:submit', () => {
+	modal.render({
+		content: contacts.render({
+			phone: '',
+			email: '',
+			valid: false,
+			errors: [],
+		}),
+	});
+});
+
+
+events.on('formContactsErrors:change', (errors: Partial<IContacts>) => {
+	const { email, phone } = errors;
+	contacts.valid = !email && !phone;
+	contacts.errors = Object.values({ email, phone })
+		.filter((i) => !!i)
+		.join('; ');
+});
+
+events.on(/^contacts\..*:change/, (data: { field: keyof IContacts; value: string }) => {
+	appData.setContactsField(data.field, data.value);
+});
+
+
+events.on('contacts:submit', () => {
+	api
+		.postOrder(appData.order)
+		.then((result) => {
+			const success = new Success(cloneTemplate(successTemplate), {
+				onClick: () => {
+					modal.close();
+				},
+			});
+			success.setTotal(result.total);
+			modal.render({
+				content: success.render({}),
+			});
+
+			appData.clearBasket();
+			page.counter = 0;
+		})
+		.catch((err) => {
+			console.error(err);
+		});
 });
 
 
